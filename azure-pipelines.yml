@@ -1,9 +1,28 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- checkout: self
+
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y openjdk-11-jdk
+    java -version
+  displayName: 'Set up Java 11'
+
+- script: |
+    mvn clean install
+  displayName: 'Build with Maven'
 
 - task: SoapUIProForAzureDevOpsTask@2
   inputs:
-    project: 'https://github.com/priteshak/POC/blob/master/calculatorDemo-soapui-project.xml'
+    project: '$(System.DefaultWorkingDirectory)/POC/calculatorDemo-soapui-project.xml'
     rootFolder: '$(Common.TestResultsDirectory)'
+
+- script: |
+    echo "Common Test Results Directory: $(Common.TestResultsDirectory)"
+    ls -la $(Common.TestResultsDirectory)
+  displayName: 'Show Test Results Directory'
